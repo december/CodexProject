@@ -1,0 +1,1351 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>家族小传</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f7f2e8;
+      --ink: #241f1b;
+      --muted: #756b60;
+      --line: #d9cdbd;
+      --red: #b84a40;
+      --green: #497a5a;
+      --blue: #376d8a;
+      --gold: #b9812d;
+      --violet: #725a8f;
+      --panel: #fffaf0;
+      --shadow: 0 16px 45px rgba(52, 38, 24, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(184, 74, 64, 0.06) 1px, transparent 1px),
+        linear-gradient(rgba(184, 74, 64, 0.05) 1px, transparent 1px),
+        var(--paper);
+      background-size: 34px 34px;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 24px 0 32px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 58px);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .ghost,
+    .primary {
+      min-height: 38px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      cursor: pointer;
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: 0 2px 0 rgba(36, 31, 27, 0.08);
+    }
+
+    .primary {
+      border-color: #8f392f;
+      background: var(--red);
+      color: white;
+    }
+
+    .ghost:hover,
+    .primary:hover {
+      transform: translateY(-1px);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(250px, 310px) 1fr minmax(250px, 300px);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255, 250, 240, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel h2 {
+      margin: 0;
+      padding: 13px 14px;
+      font-size: 17px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .child {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .portrait {
+      width: 74px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 50% 36%, #f1c49e 0 21%, transparent 22%),
+        radial-gradient(circle at 39% 34%, #2f2521 0 2px, transparent 3px),
+        radial-gradient(circle at 61% 34%, #2f2521 0 2px, transparent 3px),
+        radial-gradient(circle at 50% 59%, #e8b98f 0 20%, transparent 21%),
+        linear-gradient(150deg, #c95145 0 50%, #efc36f 51%);
+    }
+
+    .name {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .meter {
+      margin: 12px 0;
+    }
+
+    .meter-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .bar {
+      height: 12px;
+      border-radius: 99px;
+      background: #e8decf;
+      overflow: hidden;
+      border: 1px solid rgba(117, 107, 96, 0.25);
+    }
+
+    .fill {
+      height: 100%;
+      width: 0;
+      transition: width 180ms ease;
+      background: var(--blue);
+    }
+
+    .fill.red {
+      background: var(--red);
+    }
+
+    .fill.green {
+      background: var(--green);
+    }
+
+    .fill.gold {
+      background: var(--gold);
+    }
+
+    .fill.violet {
+      background: var(--violet);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.44);
+      min-height: 66px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 21px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .main-stage {
+      display: grid;
+      gap: 16px;
+    }
+
+    .phase {
+      position: relative;
+      min-height: 180px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(255, 250, 240, 0.15), rgba(255, 250, 240, 0.78)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 320'%3E%3Crect width='900' height='320' fill='%23f0dfc2'/%3E%3Cpath d='M0 242h900v78H0z' fill='%23b7c995'/%3E%3Cpath d='M120 250h130V118h-130zM172 250h52v-74h-52zM352 250h178V86H352zM390 130h32v35h-32zM458 130h32v35h-32zM632 250h116V138H632z' fill='%23c45c50'/%3E%3Cpath d='M96 118h178L186 44zM330 86h222L441 10zM610 138h158l-79-72z' fill='%237b4b3b'/%3E%3Ccircle cx='760' cy='64' r='34' fill='%23e4ad4b'/%3E%3Cpath d='M0 268c100-35 196-35 288 0s188 35 288 0 208-35 324 0v52H0z' fill='%237fa069'/%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+      box-shadow: var(--shadow);
+    }
+
+    .phase-card {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      width: min(430px, calc(100% - 36px));
+      padding: 16px;
+      border-radius: 8px;
+      color: white;
+      background: rgba(36, 31, 27, 0.82);
+      backdrop-filter: blur(4px);
+    }
+
+    .phase-card h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .phase-card p {
+      margin: 0;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .action {
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.56);
+      padding: 12px;
+      min-height: 118px;
+      cursor: pointer;
+    }
+
+    .action:hover {
+      border-color: #af6a53;
+      background: #fffdfa;
+      transform: translateY(-1px);
+    }
+
+    .action:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .action-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: rgba(184, 74, 64, 0.12);
+      color: #8f392f;
+      padding: 2px 7px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .effect {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .notice {
+      min-height: 52px;
+      padding: 12px 14px;
+      border: 1px dashed #c9ad85;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.48);
+      color: #4d4034;
+      line-height: 1.5;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 9px;
+      max-height: 365px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .log {
+      padding: 10px;
+      border-radius: 7px;
+      border-left: 4px solid var(--line);
+      background: rgba(255, 255, 255, 0.48);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .log strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .ending {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      padding: 22px;
+      place-items: center;
+      background: rgba(36, 31, 27, 0.46);
+    }
+
+    .ending.show {
+      display: grid;
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: min(720px, calc(100vh - 44px));
+      overflow: auto;
+      background: var(--panel);
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      box-shadow: 0 30px 90px rgba(36, 31, 27, 0.35);
+    }
+
+    .modal-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(184, 74, 64, 0.08);
+    }
+
+    .modal-head h2 {
+      margin: 0 0 6px;
+      font-size: 27px;
+    }
+
+    .modal-body {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .legacy-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .legacy-card {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 11px;
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .legacy-card strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+
+    .family-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .ancestor {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.48);
+    }
+
+    .seal {
+      width: 44px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--red);
+      color: white;
+      font-weight: 900;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app {
+        width: min(100vw - 20px, 1180px);
+        padding-top: 14px;
+      }
+
+      .actions,
+      .stats,
+      .legacy-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .phase {
+        min-height: 230px;
+      }
+
+      .phase-card {
+        left: 12px;
+        bottom: 12px;
+        width: calc(100% - 24px);
+      }
+
+      .ancestor {
+        grid-template-columns: 38px 1fr;
+      }
+
+      .ancestor .small:last-child {
+        grid-column: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>家族小传</h1>
+        <p class="subtitle">一代人的选择会变成下一代的起点。安排成长、扛住期待，也别把家里过成只有分数的地方。</p>
+      </div>
+      <div class="toolbar">
+        <button class="ghost" id="saveBtn" type="button">保存</button>
+        <button class="ghost" id="loadBtn" type="button">读取</button>
+        <button class="ghost" id="resetBtn" type="button">重开</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="panel">
+        <h2>这一代</h2>
+        <div class="panel-body">
+          <div class="child">
+            <div class="portrait" aria-hidden="true"></div>
+            <div>
+              <div class="name" id="childName"></div>
+              <div class="small" id="childMeta"></div>
+            </div>
+          </div>
+
+          <div class="meter">
+            <div class="meter-row"><span>压力</span><strong id="stressText"></strong></div>
+            <div class="bar"><div class="fill red" id="stressBar"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-row"><span>亲子关系</span><strong id="bondText"></strong></div>
+            <div class="bar"><div class="fill green" id="bondBar"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-row"><span>家庭资源</span><strong id="resourceText"></strong></div>
+            <div class="bar"><div class="fill gold" id="resourceBar"></div></div>
+          </div>
+
+          <div class="stats" id="stats"></div>
+        </div>
+      </aside>
+
+      <section class="main-stage">
+        <div class="phase">
+          <div class="phase-card">
+            <h2 id="phaseTitle"></h2>
+            <p id="phaseText"></p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>本回合安排</h2>
+          <div class="panel-body">
+            <div class="actions" id="actions"></div>
+          </div>
+        </div>
+
+        <div class="notice" id="notice"></div>
+      </section>
+
+      <aside class="panel">
+        <h2>家族谱系</h2>
+        <div class="panel-body">
+          <div class="family-list" id="familyList"></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="ending" id="ending">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="endingTitle">
+      <div class="modal-head">
+        <h2 id="endingTitle"></h2>
+        <div class="small" id="endingSummary"></div>
+      </div>
+      <div class="modal-body">
+        <div class="legacy-grid" id="legacyGrid"></div>
+        <div class="notice" id="legacyText"></div>
+        <button class="primary" id="nextGenBtn" type="button">开启下一代</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const names = ["林小满", "陈知秋", "许安然", "周乐行", "唐一诺", "宋星河", "陆清和", "沈有光"];
+    const phases = [
+      { age: 1, title: "牙牙学语", text: "这一岁还没有成绩单，安全感和陪伴就是最早的课程。", actions: ["touch", "pictureBook", "earlyClass", "sleepRoutine"], growth: { mood: 2, bond: 1 } },
+      { age: 2, title: "蹒跚探索", text: "孩子开始用脚步丈量世界，也开始用哭闹测试边界。", actions: ["playground", "rules", "languageGame", "grandparent"], growth: { social: 1, mood: 1 } },
+      { age: 3, title: "入园适应", text: "第一次离开家门进入集体生活，分离焦虑和小朋友一起到来。", actions: ["kindergarten", "storyNight", "shareToy", "interestTrial"], growth: { social: 2, stress: 1 } },
+      { age: 4, title: "好奇爆发", text: "为什么、为什么、为什么。答案不一定完美，但回应很重要。", actions: ["sciencePlay", "drawing", "habitChart", "parentWork"], growth: { study: 1, art: 1 } },
+      { age: 5, title: "幼小衔接", text: "铅笔、拼音和坐得住，开始被一家人认真讨论。", actions: ["pinyin", "sports", "chores", "prepSchool"], growth: { study: 2, stress: 1 } },
+      { age: 6, title: "一年级", text: "作业本变成了每天的固定来客，家庭节奏也跟着重排。", actions: ["homework", "reading", "classDuty", "rest"], growth: { study: 2, social: 1 } },
+      { age: 7, title: "习惯成形", text: "粗心、拖拉、磨蹭都不是小怪物，而是正在长出来的自控力。", actions: ["routine", "mathDrill", "music", "parentTalk"], growth: { study: 2, bond: 1 } },
+      { age: 8, title: "兴趣分岔", text: "孩子开始显露偏好，家长也开始犹豫要不要加码投入。", actions: ["club", "artTraining", "friendVisit", "screenLimit"], growth: { art: 1, social: 1 } },
+      { age: 9, title: "比较出现", text: "排名、奖状和同学家的孩子陆续登场，你开始学会比较。", actions: ["examReview", "competitionLite", "picnic", "diary"], growth: { study: 2, stress: 2 } },
+      { age: 10, title: "自尊生长", text: "一次表扬能撑很久，一句否定也会在心里住很久。", actions: ["confidence", "english", "teamSport", "strictTalk"], growth: { mood: 1, social: 1 } },
+      { age: 11, title: "高年级压力", text: "作业变厚，目标变近，家里的语气也容易变急。", actions: ["tutor", "peerStudy", "museum", "rest"], growth: { study: 2, stress: 2 } },
+      { age: 12, title: "小升初", text: "第一次真正的分岔路来了，家长群里的消息比天气预报还勤。", actions: ["entrancePrep", "portfolio", "heartTalk", "sleepRoutine"], growth: { study: 3, stress: 3 } },
+      { age: 13, title: "初一重启", text: "新学校、新同桌、新排名，旧办法未必全部好用。", actions: ["adaptSchool", "noteMethod", "newFriends", "club"], growth: { study: 2, social: 2 } },
+      { age: 14, title: "青春期前夜", text: "孩子开始需要空间，大人也要练习把担心说得不那么刺耳。", actions: ["privacy", "debate", "sports", "parentTalk"], growth: { mood: 1, bond: -1 } },
+      { age: 15, title: "中考冲刺", text: "自我意识冒头，分数也逼近门口，亲子关系进入硬仗。", actions: ["examReviewHard", "mockExam", "decompress", "strictTalk"], growth: { study: 3, stress: 4 } },
+      { age: 16, title: "高中开局", text: "新的赛道更长，孩子第一次认真想象自己以后要成为什么人。", actions: ["subjectChoice", "careerTalk", "olympiad", "friendVisit"], growth: { study: 2, social: 1 } },
+      { age: 17, title: "方向选择", text: "目标院校、专业、兴趣和现实开始挤在同一张饭桌上。", actions: ["targetCollege", "internship", "artPortfolio", "heartTalk"], growth: { study: 2, art: 1, stress: 2 } },
+      { age: 18, title: "高考季", text: "成年之前的最后冲刺，家庭资源、心态和能力都要一起结算。", actions: ["finalSprint", "examMindset", "familySupport", "graduationTrip"], growth: { stress: 3 } }
+    ];
+
+    const actionCatalog = {
+      touch: {
+        name: "抱抱回应",
+        tag: "安全感",
+        desc: "亲子关系 +6，情绪 +5，压力 -3。小孩先学会被接住。",
+        effect: state => change(state, { bond: 6, mood: 5, stress: -3 })
+      },
+      pictureBook: {
+        name: "绘本时间",
+        tag: "启蒙",
+        desc: "学业 +3，情商 +2，亲子关系 +3。书香会让理解更快发芽。",
+        effect: state => change(state, { study: 3 + state.legacy.study, social: 2, bond: 3 })
+      },
+      earlyClass: {
+        name: "早教体验",
+        tag: "投入",
+        desc: "学业 +4，才艺 +2，压力 +4，资源 -5。起跑线也要花钱维护。",
+        cost: 5,
+        effect: state => change(state, { study: 4 + state.legacy.study, art: 2, stress: 4, resource: -5 })
+      },
+      sleepRoutine: {
+        name: "规律作息",
+        tag: "恢复",
+        desc: "情绪 +5，压力 -7，亲子关系 +2。睡得好是全家最便宜的补课。",
+        effect: state => change(state, { mood: 5, stress: -7, bond: 2 })
+      },
+      playground: {
+        name: "公园撒欢",
+        tag: "探索",
+        desc: "情商 +4，情绪 +4，压力 -3。摔一跤也算认识世界。",
+        effect: state => change(state, { social: 4 + state.legacy.social, mood: 4, stress: -3 })
+      },
+      rules: {
+        name: "温柔立规矩",
+        tag: "边界",
+        desc: "学业 +2，亲子关系 +4，压力 +1。规则不是吼出来的。",
+        effect: state => change(state, { study: 2, bond: 4, stress: 1 })
+      },
+      languageGame: {
+        name: "语言小游戏",
+        tag: "表达",
+        desc: "学业 +3，情商 +3，情绪 +1。会说出来，就少憋一点。",
+        effect: state => change(state, { study: 3 + state.legacy.study, social: 3, mood: 1 })
+      },
+      grandparent: {
+        name: "祖辈带娃",
+        tag: "资源",
+        desc: "资源 +5，亲子关系 +1，习惯略松。家里多一双手。",
+        effect: state => change(state, { resource: 5, bond: 1, study: -1 })
+      },
+      kindergarten: {
+        name: "入园适应",
+        tag: "集体",
+        desc: "情商 +5，压力 +3，亲子关系 +2。第一次学会说再见。",
+        effect: state => change(state, { social: 5 + state.legacy.social, stress: 3, bond: 2 })
+      },
+      storyNight: {
+        name: "睡前故事",
+        tag: "陪伴",
+        desc: "亲子关系 +5，情绪 +4，学业 +1。故事也是家风的一部分。",
+        effect: state => change(state, { bond: 5, mood: 4, study: 1 })
+      },
+      shareToy: {
+        name: "练习分享",
+        tag: "社交",
+        desc: "情商 +5，压力 +1，情绪 +1。玩具外交开始了。",
+        effect: state => change(state, { social: 5 + state.legacy.social, stress: 1, mood: 1 })
+      },
+      interestTrial: {
+        name: "兴趣试听",
+        tag: "兴趣",
+        desc: "才艺 +5，情绪 +2，资源 -4。喜欢不喜欢，试过才知道。",
+        cost: 4,
+        effect: state => change(state, { art: 5 + state.legacy.art, mood: 2, resource: -4 })
+      },
+      sciencePlay: {
+        name: "科学小实验",
+        tag: "好奇",
+        desc: "学业 +4，情绪 +2，资源 -2。把为什么变成再来一次。",
+        cost: 2,
+        effect: state => change(state, { study: 4 + state.legacy.study, mood: 2, resource: -2 })
+      },
+      drawing: {
+        name: "乱画一下午",
+        tag: "创作",
+        desc: "才艺 +5，情绪 +3，亲子关系 +1。纸上先长出自己的世界。",
+        effect: state => change(state, { art: 5 + state.legacy.art, mood: 3, bond: 1 })
+      },
+      habitChart: {
+        name: "习惯小红花",
+        tag: "自律",
+        desc: "学业 +3，亲子关系 +2，压力 +2。奖励要用得轻一点。",
+        effect: state => change(state, { study: 3, bond: 2, stress: 2 })
+      },
+      parentWork: {
+        name: "大人加班",
+        tag: "现实",
+        desc: "资源 +6，亲子关系 -3，情绪 -1。钱和陪伴偶尔会抢时间。",
+        effect: state => change(state, { resource: 6, bond: -3, mood: -1 })
+      },
+      pinyin: {
+        name: "拼音启蒙",
+        tag: "衔接",
+        desc: "学业 +5，压力 +3。提前一点，但别把童年全提前没了。",
+        effect: state => change(state, { study: 5 + state.legacy.study, stress: 3 })
+      },
+      sports: {
+        name: "运动放电",
+        tag: "体能",
+        desc: "情绪 +5，压力 -5，情商 +2。跑累了，很多事就顺了。",
+        effect: state => change(state, { mood: 5, stress: -5, social: 2 })
+      },
+      chores: {
+        name: "做点家务",
+        tag: "责任",
+        desc: "情商 +3，亲子关系 +3，情绪 +1。家不是自动运行的。",
+        effect: state => change(state, { social: 3, bond: 3, mood: 1 })
+      },
+      prepSchool: {
+        name: "幼小衔接班",
+        tag: "投入",
+        desc: "学业 +6，压力 +5，资源 -5。短期很香，长期看心态。",
+        cost: 5,
+        effect: state => change(state, { study: 6 + state.legacy.study, stress: 5, resource: -5 })
+      },
+      homework: {
+        name: "陪写作业",
+        tag: "基础",
+        desc: "学业 +5，压力 +3，亲子关系 -1。语气稳定就多赚一点。",
+        effect: state => change(state, { study: 5 + state.legacy.study, stress: 3, bond: -1 })
+      },
+      reading: {
+        name: "自主阅读",
+        tag: "书香",
+        desc: "学业 +4，情绪 +2，亲子关系 +1。阅读是慢慢攒的复利。",
+        effect: state => change(state, { study: 4 + state.legacy.study, mood: 2, bond: 1 })
+      },
+      classDuty: {
+        name: "当小干部",
+        tag: "责任",
+        desc: "情商 +5，学业 +1，压力 +2。被看见也要学会扛事。",
+        effect: state => change(state, { social: 5 + state.legacy.social, study: 1, stress: 2 })
+      },
+      rest: {
+        name: "好好休息",
+        tag: "恢复",
+        desc: "压力 -9，情绪 +5，亲子关系 +2。世界不会因为今天不卷而塌掉。",
+        effect: state => change(state, { stress: -9, mood: 5, bond: 2 })
+      },
+      routine: {
+        name: "整理书包",
+        tag: "习惯",
+        desc: "学业 +3，情绪 +1，压力 -1。少丢一本作业本，少一场家庭风暴。",
+        effect: state => change(state, { study: 3, mood: 1, stress: -1 })
+      },
+      mathDrill: {
+        name: "口算训练",
+        tag: "基础",
+        desc: "学业 +5，压力 +4。熟练度是练出来的，也会累出来。",
+        effect: state => change(state, { study: 5 + state.legacy.study, stress: 4 })
+      },
+      music: {
+        name: "乐器入门",
+        tag: "才艺",
+        desc: "才艺 +6，压力 +2，资源 -4。第一首曲子通常不太像曲子。",
+        cost: 4,
+        effect: state => change(state, { art: 6 + state.legacy.art, stress: 2, resource: -4 })
+      },
+      parentTalk: {
+        name: "家庭谈心",
+        tag: "家风",
+        desc: "亲子关系 +7，压力 -4，情绪 +2。理解也是可以传承的资产。",
+        effect: state => change(state, { bond: 7, stress: -4, mood: 2 })
+      },
+      club: {
+        name: "参加社团",
+        tag: "兴趣",
+        desc: "才艺 +4，情商 +4，情绪 +2。兴趣会带来同路人。",
+        effect: state => change(state, { art: 4 + state.legacy.art, social: 4 + state.legacy.social, mood: 2 })
+      },
+      artTraining: {
+        name: "系统才艺课",
+        tag: "投入",
+        desc: "才艺 +7，压力 +3，资源 -6。舞台感和账单一起增长。",
+        cost: 6,
+        effect: state => change(state, { art: 7 + state.legacy.art, stress: 3, resource: -6 })
+      },
+      friendVisit: {
+        name: "约同学玩",
+        tag: "关系",
+        desc: "情商 +5，压力 -3，情绪 +3。友谊也是成长资源。",
+        effect: state => change(state, { social: 5 + state.legacy.social, stress: -3, mood: 3 })
+      },
+      screenLimit: {
+        name: "约定屏幕时间",
+        tag: "边界",
+        desc: "学业 +2，亲子关系 +2，压力 +2。边界清楚，冲突少一点。",
+        effect: state => change(state, { study: 2, bond: 2, stress: 2 })
+      },
+      examReview: {
+        name: "单元复习",
+        tag: "成绩",
+        desc: "学业 +6，压力 +5，亲子关系 -1。开始有了分数的重量。",
+        effect: state => change(state, { study: 6 + state.legacy.study, stress: 5, bond: -1 })
+      },
+      competitionLite: {
+        name: "校内竞赛",
+        tag: "机会",
+        desc: "学业 +5，才艺 +2，压力 +5，资源 -3。小奖状也会发光。",
+        cost: 3,
+        effect: state => change(state, { study: 5, art: 2, stress: 5, resource: -3 })
+      },
+      picnic: {
+        name: "周末野餐",
+        tag: "松弛",
+        desc: "亲子关系 +6，压力 -6，资源 -3。不是所有周末都要被安排满。",
+        cost: 3,
+        effect: state => change(state, { bond: 6, stress: -6, resource: -3 })
+      },
+      diary: {
+        name: "写心情日记",
+        tag: "自我",
+        desc: "情绪 +5，压力 -3，学业 +1。把心事放到纸上，会轻一点。",
+        effect: state => change(state, { mood: 5, stress: -3, study: 1 })
+      },
+      confidence: {
+        name: "认真夸一次",
+        tag: "自尊",
+        desc: "情绪 +6，亲子关系 +4，压力 -2。具体的肯定比空泛的厉害更有用。",
+        effect: state => change(state, { mood: 6, bond: 4, stress: -2 })
+      },
+      english: {
+        name: "英语加餐",
+        tag: "学科",
+        desc: "学业 +5，压力 +3，资源 -3。多一门语言，也多一点练习。",
+        cost: 3,
+        effect: state => change(state, { study: 5 + state.legacy.study, stress: 3, resource: -3 })
+      },
+      teamSport: {
+        name: "团队运动",
+        tag: "协作",
+        desc: "情商 +5，情绪 +4，压力 -3。输赢之外，还有配合。",
+        effect: state => change(state, { social: 5 + state.legacy.social, mood: 4, stress: -3 })
+      },
+      strictTalk: {
+        name: "严厉敲打",
+        tag: "高压",
+        desc: "学业 +4，压力 +7，亲子关系 -5。见效快，但余味重。",
+        effect: state => change(state, { study: 4, stress: 7, bond: -5 })
+      },
+      tutor: {
+        name: "请家教",
+        tag: "资源",
+        desc: "学业 +8，压力 +4，资源 -8。效率很高，钱包也很有感觉。",
+        cost: 8,
+        effect: state => change(state, { study: 8 + state.legacy.study, stress: 4, resource: -8 })
+      },
+      peerStudy: {
+        name: "同伴学习",
+        tag: "互助",
+        desc: "学业 +4，情商 +3，压力 -1。有人一起写题，题也没那么冷。",
+        effect: state => change(state, { study: 4, social: 3 + state.legacy.social, stress: -1 })
+      },
+      museum: {
+        name: "逛博物馆",
+        tag: "视野",
+        desc: "学业 +3，才艺 +3，情绪 +3，资源 -3。知识偶尔也可以不在卷子上。",
+        cost: 3,
+        effect: state => change(state, { study: 3, art: 3, mood: 3, resource: -3 })
+      },
+      entrancePrep: {
+        name: "小升初冲刺",
+        tag: "升学",
+        desc: "学业 +9，压力 +8，亲子关系 -2。关键节点，家里很难完全淡定。",
+        effect: state => change(state, { study: 9 + state.legacy.study, stress: 8, bond: -2 })
+      },
+      portfolio: {
+        name: "整理履历",
+        tag: "机会",
+        desc: "学业 +3，才艺 +4，情商 +2，资源 -4。把经历整理成被看见的样子。",
+        cost: 4,
+        effect: state => change(state, { study: 3, art: 4, social: 2, resource: -4 })
+      },
+      heartTalk: {
+        name: "认真听孩子说",
+        tag: "沟通",
+        desc: "亲子关系 +8，压力 -5，情绪 +3。先听完，比先讲道理更难。",
+        effect: state => change(state, { bond: 8, stress: -5, mood: 3 })
+      },
+      adaptSchool: {
+        name: "适应新学校",
+        tag: "适应",
+        desc: "情商 +5，学业 +2，压力 -2。把陌生变成熟悉需要时间。",
+        effect: state => change(state, { social: 5 + state.legacy.social, study: 2, stress: -2 })
+      },
+      noteMethod: {
+        name: "学习方法",
+        tag: "效率",
+        desc: "学业 +6，压力 -1。会学比硬学更省力。",
+        effect: state => change(state, { study: 6 + state.legacy.study, stress: -1 })
+      },
+      newFriends: {
+        name: "认识新朋友",
+        tag: "关系",
+        desc: "情商 +6，情绪 +3，压力 -2。新同桌可能是新世界入口。",
+        effect: state => change(state, { social: 6 + state.legacy.social, mood: 3, stress: -2 })
+      },
+      privacy: {
+        name: "给一点空间",
+        tag: "尊重",
+        desc: "亲子关系 +5，情绪 +4，学业 -1。信任不是放任，是少一点盯梢。",
+        effect: state => change(state, { bond: 5, mood: 4, study: -1 })
+      },
+      debate: {
+        name: "参加辩论",
+        tag: "表达",
+        desc: "情商 +6，学业 +2，压力 +2。学会表达，也学会听反对意见。",
+        effect: state => change(state, { social: 6 + state.legacy.social, study: 2, stress: 2 })
+      },
+      examReviewHard: {
+        name: "中考题海",
+        tag: "冲刺",
+        desc: "学业 +10，压力 +10，亲子关系 -3。有效，但很硬。",
+        effect: state => change(state, { study: 10 + state.legacy.study, stress: 10, bond: -3 })
+      },
+      mockExam: {
+        name: "模拟考试",
+        tag: "检验",
+        desc: "学业 +6，压力 +6，情绪 -2。知道差距，也要接住情绪。",
+        effect: state => change(state, { study: 6, stress: 6, mood: -2 })
+      },
+      decompress: {
+        name: "考前减压",
+        tag: "心态",
+        desc: "压力 -10，情绪 +6，亲子关系 +3。稳住才有余力发挥。",
+        effect: state => change(state, { stress: -10, mood: 6, bond: 3 })
+      },
+      subjectChoice: {
+        name: "选科规划",
+        tag: "方向",
+        desc: "学业 +5，情绪 +2，压力 +2。选择开始有了长期后果。",
+        effect: state => change(state, { study: 5, mood: 2, stress: 2 })
+      },
+      careerTalk: {
+        name: "职业聊天",
+        tag: "视野",
+        desc: "情商 +4，情绪 +4，亲子关系 +3。未来不是只有一个模板。",
+        effect: state => change(state, { social: 4, mood: 4, bond: 3 })
+      },
+      olympiad: {
+        name: "竞赛路线",
+        tag: "高阶",
+        desc: "学业 +9，压力 +7，资源 -6。天赋、资源和耐受力一起被考验。",
+        cost: 6,
+        effect: state => change(state, { study: 9 + state.legacy.study, stress: 7, resource: -6 })
+      },
+      targetCollege: {
+        name: "目标院校",
+        tag: "目标",
+        desc: "学业 +6，压力 +5，情绪 +1。目标清楚，焦虑也更具体。",
+        effect: state => change(state, { study: 6, stress: 5, mood: 1 })
+      },
+      internship: {
+        name: "社会实践",
+        tag: "现实",
+        desc: "情商 +6，学业 +2，资源 +2。看见真实世界，题目会换一种意义。",
+        effect: state => change(state, { social: 6 + state.legacy.social, study: 2, resource: 2 })
+      },
+      artPortfolio: {
+        name: "作品集",
+        tag: "专业",
+        desc: "才艺 +9，压力 +5，资源 -7。把热爱做成能被评审看懂的东西。",
+        cost: 7,
+        effect: state => change(state, { art: 9 + state.legacy.art, stress: 5, resource: -7 })
+      },
+      finalSprint: {
+        name: "高考冲刺",
+        tag: "终局",
+        desc: "学业 +10，压力 +10，情绪 -2。最后一公里，别把人跑丢。",
+        effect: state => change(state, { study: 10 + state.legacy.study, stress: 10, mood: -2 })
+      },
+      examMindset: {
+        name: "考试心态",
+        tag: "稳定",
+        desc: "压力 -8，情绪 +6，学业 +2。会答题，也要会呼吸。",
+        effect: state => change(state, { stress: -8, mood: 6, study: 2 })
+      },
+      familySupport: {
+        name: "全家托底",
+        tag: "支持",
+        desc: "亲子关系 +8，压力 -6，资源 -3。家不是考场，是后方。",
+        cost: 3,
+        effect: state => change(state, { bond: 8, stress: -6, resource: -3 })
+      },
+      graduationTrip: {
+        name: "毕业旅行",
+        tag: "告别",
+        desc: "情绪 +8，亲子关系 +5，资源 -6。成年前，认真告别一次。",
+        cost: 6,
+        effect: state => change(state, { mood: 8, bond: 5, resource: -6 })
+      }
+    };
+
+    const events = [
+      {
+        title: "家长群热议",
+        text: "隔壁孩子又拿奖了。你家短暂焦虑，压力上升。",
+        run: state => change(state, { stress: 7 })
+      },
+      {
+        title: "老师表扬",
+        text: "一次认真完成的小事被看见，孩子的情绪亮了一截。",
+        run: state => change(state, { mood: 8, bond: 2 })
+      },
+      {
+        title: "家庭小旅行",
+        text: "没有赶行程的一天，关系变松弛了。",
+        run: state => change(state, { bond: 8, stress: -7, resource: -4 })
+      },
+      {
+        title: "临时加班",
+        text: "大人也有大人的难处。资源增加，但陪伴少了一些。",
+        run: state => change(state, { resource: 7, bond: -5 })
+      },
+      {
+        title: "一次争吵",
+        text: "话赶话说重了。压力和距离一起冒出来。",
+        run: state => change(state, { stress: 8, bond: -7 })
+      }
+    ];
+
+    const els = {
+      childName: document.querySelector("#childName"),
+      childMeta: document.querySelector("#childMeta"),
+      stressText: document.querySelector("#stressText"),
+      stressBar: document.querySelector("#stressBar"),
+      bondText: document.querySelector("#bondText"),
+      bondBar: document.querySelector("#bondBar"),
+      resourceText: document.querySelector("#resourceText"),
+      resourceBar: document.querySelector("#resourceBar"),
+      stats: document.querySelector("#stats"),
+      phaseTitle: document.querySelector("#phaseTitle"),
+      phaseText: document.querySelector("#phaseText"),
+      actions: document.querySelector("#actions"),
+      notice: document.querySelector("#notice"),
+      familyList: document.querySelector("#familyList"),
+      ending: document.querySelector("#ending"),
+      endingTitle: document.querySelector("#endingTitle"),
+      endingSummary: document.querySelector("#endingSummary"),
+      legacyGrid: document.querySelector("#legacyGrid"),
+      legacyText: document.querySelector("#legacyText")
+    };
+
+    let state = createGame();
+
+    document.querySelector("#saveBtn").addEventListener("click", () => {
+      localStorage.setItem("family-game-save", JSON.stringify(state));
+      setNotice("存档已写进浏览器。本家族的故事暂时收好。");
+    });
+
+    document.querySelector("#loadBtn").addEventListener("click", () => {
+      const saved = localStorage.getItem("family-game-save");
+      if (!saved) {
+        setNotice("还没有存档。先把这一代养出点故事吧。");
+        return;
+      }
+      state = JSON.parse(saved);
+      render();
+      setNotice("存档已读取。家里那本旧相册又翻开了。");
+    });
+
+    document.querySelector("#resetBtn").addEventListener("click", () => {
+      localStorage.removeItem("family-game-save");
+      state = createGame();
+      render();
+      setNotice("新家族开局。愿这次少一点焦虑，多一点饭后散步。");
+    });
+
+    document.querySelector("#nextGenBtn").addEventListener("click", () => {
+      state = nextGeneration(state);
+      els.ending.classList.remove("show");
+      render();
+      setNotice("下一代出生了。上一代留下的资源、性格和未说完的话，都成了新的起点。");
+    });
+
+    function createGame() {
+      return {
+        generation: 1,
+        name: pick(names),
+        phase: 0,
+        actionCount: 0,
+        stress: 26,
+        bond: 64,
+        resource: 54,
+        study: 18,
+        art: 12,
+        social: 16,
+        mood: 58,
+        legacy: { study: 0, art: 0, social: 0, resource: 0, bond: 0 },
+        ancestry: []
+      };
+    }
+
+    function nextGeneration(prev) {
+      const legacy = buildLegacy(prev);
+      return {
+        generation: prev.generation + 1,
+        name: pick(names),
+        phase: 0,
+        actionCount: 0,
+        stress: clamp(24 - legacy.bond, 5, 60),
+        bond: clamp(55 + legacy.bond * 3, 20, 92),
+        resource: clamp(42 + legacy.resource * 5, 15, 95),
+        study: clamp(12 + legacy.study * 3, 0, 65),
+        art: clamp(10 + legacy.art * 3, 0, 65),
+        social: clamp(12 + legacy.social * 3, 0, 65),
+        mood: clamp(52 + legacy.bond * 2, 18, 95),
+        legacy,
+        ancestry: [
+          {
+            name: prev.name,
+            generation: prev.generation,
+            ending: getEnding(prev).title,
+            score: getEnding(prev).score
+          },
+          ...prev.ancestry
+        ].slice(0, 8)
+      };
+    }
+
+    function buildLegacy(s) {
+      return {
+        study: Math.floor(s.study / 36),
+        art: Math.floor(s.art / 36),
+        social: Math.floor(s.social / 36),
+        resource: Math.floor(s.resource / 28),
+        bond: Math.floor(s.bond / 34)
+      };
+    }
+
+    function change(s, delta) {
+      Object.entries(delta).forEach(([key, value]) => {
+        s[key] = clamp((s[key] ?? 0) + value, 0, 100);
+      });
+    }
+
+    function chooseAction(action) {
+      const phase = phases[state.phase] ?? phases[phases.length - 1];
+      action.effect(state);
+      state.actionCount += 1;
+
+      const event = Math.random() < 0.58 ? pick(events) : null;
+      let message = `你安排了「${action.name}」。`;
+      if (event) {
+        event.run(state);
+        message += ` ${event.title}：${event.text}`;
+      }
+
+      if (state.stress >= 92) {
+        change(state, { mood: -14, bond: -8, study: -5 });
+        message += " 压力爆表，孩子明显有点撑不住。";
+      }
+
+      if (state.actionCount >= 2) {
+        state.actionCount = 0;
+        applyYearGrowth(phase);
+        state.phase += 1;
+        message += ` ${phase.age} 岁结束，${formatDelta(phase.growth)}。`;
+      }
+
+      if (state.phase >= phases.length) {
+        showEnding();
+        return;
+      }
+
+      render();
+      setNotice(message);
+    }
+
+    function applyYearGrowth(phase) {
+      if (phase?.growth) {
+        change(state, phase.growth);
+      }
+    }
+
+    function getEnding(s) {
+      const balanced = Math.min(s.study, s.art, s.social, s.mood) + s.bond * 0.35 - s.stress * 0.2;
+      const score = Math.round(s.study * 1.25 + s.art * 0.75 + s.social * 0.9 + s.mood * 0.65 + s.bond * 0.7 + s.resource * 0.45 - s.stress * 0.85);
+
+      if (s.stress > 88 && s.bond < 35) {
+        return {
+          title: "沉默的远行者",
+          score,
+          text: "成绩没有消失，但家里很多话变成了未读消息。下一代会继承更敏感的情绪底色。"
+        };
+      }
+      if (s.study >= 82 && s.stress < 82) {
+        return {
+          title: "稳稳上岸的卷王",
+          score,
+          text: "这代人学会了把努力用在刀刃上，留下了书香、人脉和一点点不服输。"
+        };
+      }
+      if (s.art >= 78 && s.mood >= 55) {
+        return {
+          title: "闪闪发光的偏科生",
+          score,
+          text: "不是最标准的路线，但一路长出了自己的舞台。下一代会更容易相信兴趣有价值。"
+        };
+      }
+      if (s.social >= 78 && s.bond >= 62) {
+        return {
+          title: "会生活的大人",
+          score,
+          text: "这代人把关系经营成了真正的底气。家风里多了沟通、松弛和互相照顾。"
+        };
+      }
+      if (balanced >= 58) {
+        return {
+          title: "普通但辽阔的人生",
+          score,
+          text: "没有传奇桥段，但孩子拥有选择、复原和继续往前的能力。"
+        };
+      }
+      return {
+        title: "跌跌撞撞的毕业生",
+        score,
+        text: "这一代有遗憾，也有经验。遗憾不会消失，但可以在下一代被重新理解。"
+      };
+    }
+
+    function showEnding() {
+      const ending = getEnding(state);
+      const legacy = buildLegacy(state);
+      els.endingTitle.textContent = ending.title;
+      els.endingSummary.textContent = `${state.name}成年了。综合评价 ${ending.score}，第 ${state.generation} 代的故事暂时收束。`;
+      els.legacyText.textContent = ending.text;
+      els.legacyGrid.innerHTML = [
+        ["书香", legacy.study, "下一代学习行动额外收益"],
+        ["审美", legacy.art, "下一代才艺行动额外收益"],
+        ["人情", legacy.social, "下一代社交行动额外收益"],
+        ["家底", legacy.resource, "下一代初始资源提高"],
+        ["家风", legacy.bond, "下一代初始关系更稳"]
+      ].map(item => `
+        <div class="legacy-card">
+          <strong>${item[1]}</strong>
+          <span>${item[0]}</span>
+          <div class="small">${item[2]}</div>
+        </div>
+      `).join("");
+      renderFamily();
+      els.ending.classList.add("show");
+    }
+
+    function render() {
+      const phase = phases[state.phase] ?? phases[phases.length - 1];
+      els.childName.textContent = state.name;
+      els.childMeta.textContent = `第 ${state.generation} 代 · ${phase.age} 岁 · ${phase.title} · 今年 ${state.actionCount}/2`;
+      els.phaseTitle.textContent = `${phase.title} · ${phase.age} 岁`;
+      els.phaseText.textContent = phase.text;
+
+      setMeter("stress", state.stress);
+      setMeter("bond", state.bond);
+      setMeter("resource", state.resource);
+
+      els.stats.innerHTML = [
+        ["学业", state.study],
+        ["才艺", state.art],
+        ["情商", state.social],
+        ["情绪", state.mood]
+      ].map(([label, value]) => `
+        <div class="stat">
+          <strong>${value}</strong>
+          <span>${label}</span>
+        </div>
+      `).join("");
+
+      els.actions.innerHTML = phase.actions.map(id => {
+        const action = actionCatalog[id];
+        const disabled = action.cost && state.resource < action.cost;
+        return `
+          <button class="action" type="button" data-id="${id}" ${disabled ? "disabled" : ""}>
+            <div class="action-title"><span>${action.name}</span><span class="tag">${action.tag}</span></div>
+            <p class="effect">${action.desc}</p>
+          </button>
+        `;
+      }).join("");
+
+      els.actions.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          const action = actionCatalog[button.dataset.id];
+          chooseAction(action);
+        });
+      });
+
+      renderFamily();
+    }
+
+    function renderFamily() {
+      const current = {
+        name: state.name,
+        generation: state.generation,
+        ending: "成长中",
+        score: Math.round(state.study + state.art + state.social + state.mood - state.stress / 2)
+      };
+      const family = [current, ...state.ancestry];
+      els.familyList.innerHTML = family.map(person => `
+        <div class="ancestor">
+          <div class="seal">${person.generation}</div>
+          <div>
+            <strong>${person.name}</strong>
+            <div class="small">${person.ending}</div>
+          </div>
+          <div class="small">评价 ${person.score}</div>
+        </div>
+      `).join("");
+    }
+
+    function setMeter(key, value) {
+      els[`${key}Text`].textContent = value;
+      els[`${key}Bar`].style.width = `${value}%`;
+    }
+
+    function setNotice(text) {
+      els.notice.textContent = text;
+    }
+
+    function pick(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, Math.round(value)));
+    }
+
+    function formatDelta(delta) {
+      const labels = {
+        study: "学业",
+        art: "才艺",
+        social: "情商",
+        mood: "情绪",
+        stress: "压力",
+        bond: "亲子关系",
+        resource: "家庭资源"
+      };
+      const parts = Object.entries(delta ?? {}).map(([key, value]) => `${labels[key]} ${value > 0 ? "+" : ""}${value}`);
+      return parts.length ? `自然成长：${parts.join("，")}` : "这一岁平稳过去";
+    }
+
+    render();
+    setNotice("从 1 岁开始选择每年的成长安排。每岁有两次行动，18 岁后进入成年结算，并把家族特质传给下一代。");
+  </script>
+</body>
+</html>
